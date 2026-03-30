@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI.BUDDY | システム詳細仕様書</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
+    
+    :root {
+      --midnight: #020617;
+      --paper: #ffffff;
+      --growth-lime: #a3e635;
+      --slate-soft: #f1f5f9;
+      --border-color: #020617;
+      --text-main: #020617;
+    }
+
+    body { 
+      font-family: 'Inter', 'Zen Maru Gothic', sans-serif;
+      background-color: var(--paper);
+      color: var(--text-main);
+      scroll-behavior: smooth;
+    }
+
+    /* 斜体禁止 */
+    * { font-style: normal !important; }
+
+    /* --- 高速スプラッシュ --- */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: var(--midnight);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .splash-container { text-align: center; animation: splash-anim 2.5s forwards; }
+    @keyframes splash-anim {
+      0% { opacity: 0; transform: translateY(10px); }
+      15% { opacity: 1; transform: translateY(0); }
+      85% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+    .text-lime-primary { color: var(--growth-lime) !important; }
+
+    /* --- メインレイアウト --- */
+    .app-container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 100vh;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    body.app-ready .app-container { opacity: 1; }
+
+    aside {
+      background-color: var(--midnight);
+      color: white;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 4rem 2rem;
+      border-right: 4px solid var(--growth-lime);
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    main { padding: 6rem 8%; max-width: 1200px; }
+
+    section {
+      margin-bottom: 12rem;
+      opacity: 0.2;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    section.active { opacity: 1; transform: translateY(0); }
+
+    .nav-item {
+      display: block;
+      padding: 0.8rem 0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.4);
+      transition: all 0.2s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+    }
+    .nav-item:hover { color: var(--growth-lime); }
+    .nav-item.active { color: var(--growth-lime); border-bottom-color: var(--growth-lime); padding-left: 0.5rem; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background-color: var(--midnight);
+      color: var(--growth-lime);
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+    }
+
+    .section-h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 3rem; line-height: 1.2; color: var(--midnight); }
+
+    .info-card { background-color: white; border-radius: 12px; padding: 2.5rem; border: 2px solid var(--midnight); }
+    
+    .code-block {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 1.5rem;
+      border-radius: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .timeline { position: relative; padding-left: 3rem; margin: 4rem 0; }
+    .timeline::before { content: ""; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: var(--slate-soft); }
+    .timeline-item { position: relative; margin-bottom: 4rem; }
+    .timeline-dot { position: absolute; left: -3rem; top: 0; width: 26px; height: 26px; background: var(--midnight); border: 4px solid var(--growth-lime); border-radius: 50%; z-index: 2; }
+    .timeline-content { background: white; border: 2px solid var(--midnight); border-radius: 16px; padding: 2.5rem; box-shadow: 6px 6px 0px var(--midnight); }
+
+    details { background: var(--slate-soft); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--midnight); margin-top: 1rem; }
+    summary { font-weight: 900; cursor: pointer; color: var(--midnight); display: flex; align-items: center; gap: 0.5rem; }
+
+    .feedback-spec-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      background: white;
+      border: 2px solid var(--midnight);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      box-shadow: 4px 4px 0px var(--midnight);
+    }
+    .feedback-label { background: var(--midnight); color: var(--growth-lime); padding: 1rem; font-weight: 900; text-align: center; }
+    .feedback-content { padding: 1rem 1.5rem; font-size: 1rem; font-weight: 800; color: var(--midnight); }
+
+    .text-heavy { font-weight: 800; line-height: 1.8; }
+
+    @media (max-width: 1024px) {
+      .app-container { grid-template-columns: 1fr; }
+      aside { display: none; }
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <div id="splash">
+    <div class="splash-container">
+      <h1 class="text-white text-3xl md:text-5xl font-black leading-tight tracking-tight">
+        商談の <span class="text-lime-primary">「熱量」</span> を、<br>
+        最高の勝ち筋に変える。
+      </h1>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <aside>
+      <div class="mb-12">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-7 h-7 bg-white text-midnight rounded flex items-center justify-center font-black text-sm border-2 border-midnight">B</div>
+          <span class="text-lg font-black tracking-widest uppercase">AI.BUDDY</span>
+        </div>
+        <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Technical Specification v4.4</p>
+      </div>
+
+      <nav class="flex-1">
+        <a href="#definition" class="nav-item">01. システム定義</a>
+        <a href="#processing-flow" class="nav-item">02. 処理プロセス</a>
+        <a href="#prompt-logic" class="nav-item">03. 専門家フィードバックの論理設計</a>
+        <a href="#output-schema" class="nav-item">04. 出力定義と検証</a>
+        <a href="#infrastructure" class="nav-item">05. 技術スタック</a>
+      </nav>
+
+      <div class="mt-auto pt-6 border-t border-white/10 opacity-40">
+        <p class="text-[8px] leading-relaxed font-bold uppercase">
+          Build: 2026.03.30.rev7<br>
+          Eng: Strategic Agent
+        </p>
+      </div>
+    </aside>
+
+    <main>
+      <!-- 01. システム定義 -->
+      <section id="definition">
+        <span class="badge">01. Definition</span>
+        <h2 class="section-h2">専門家の目線による<br><span class="text-lime-primary">「提案の妥当性」を自動診断。</span></h2>
+        
+        <div class="info-card">
+          <h3 class="font-black text-xl mb-4">AI.BUDDY の技術的役割</h3>
+          <p class="text-heavy text-lg">
+            AI.BUDDYは、商談における音声・視覚データを構造化し、外部ドメインナレッジと突合させることで、「その提案に勝算はあるか」をプロの視点で評価する診断システムである。
+            単なる要約ではなく、特定の業界慣習や商流に基づいた「専門家としての意見」を提供し、営業担当者の提案品質を客観的に検証するパートナーとして動作する。
+          </p>
+        </div>
+      </section>
+
+      <!-- 02. 処理プロセス -->
+      <section id="processing-flow">
+        <span class="badge">02. Processing Flow</span>
+        <h2 class="section-h2">顧客特定から専門家フィードバックまで</h2>
+        
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h4 class="font-black text-xl mb-4">1. 顧客情報の特定と業界視点のロード</h4>
+              <p class="text-heavy text-base mb-4">
+                gBizINFO APIから取得した属性データをもとに、AIに「お相手が属する業界の常識」を同期します。
+              </p>
+              <div class="p-5 bg-slate-50 border-2 border-midnight rounded-xl">
+                <h5 class="font-black text-sm mb-2">【技術解説：評価基準の動的生成】</h5>
+                <p class="text-sm text-heavy">
+                  AIは、取得した事業内容に基づき「この業界であれば、何を評価基準に据えるべきか」というチェックリストをその場で生成します。これにより、お客様の業種ごとに異なる「刺さるポイント」や「懸念すべき観点」を網羅した評価が可能になります。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h4 class="font-black text-xl mb-4">2. 商談の動画やテキストデータからの多角的解析</h4>
+              <p class="text-heavy text-base">
+                Gemini 1.5 Proにより、提案に対するお客様の反応をダイレクトに読み取ります。
+              </p>
+              
+              <details>
+                <summary><i data-lucide="chevron-down" class="w-4 h-4"></i> 非言語情報の解析によって特定される「本音」</summary>
+                <div class="pt-4 space-y-4">
+                  <div>
+                    <h5 class="font-black text-sm mb-1">提案時の視覚反応</h5>
+                    <p class="text-sm text-heavy">スライド提示時や見積もり提示時の表情の硬さや頷きを解析し、「納得感」を数値化します。</p>
+                  </div>
+                  <div>
+                    <h5 class="font-black text-sm mb-1">話者間のラグとトーン</h5>
+                    <p class="text-sm text-heavy">質問に対するお客様の回答の「迷い（間）」や、声のトーンの変化から、提案に対する警戒心や懸念点を抽出します。</p>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content border-4 border-midnight bg-slate-50">
+              <h4 class="font-black text-xl mb-4">3. フィードバック精度向上のための対話型検証</h4>
+              <p class="text-heavy text-base mb-4">
+                AIが「この提案には、まだ確認すべき懸念がある」と判断した場合、ユーザーに逆質問を行い、より確かな評価へと昇華させます。
+              </p>
+              <div class="p-4 bg-white rounded-lg border-2 border-midnight flex gap-4 items-start shadow-[4px_4px_0px_#020617]">
+                <i data-lucide="help-circle" class="text-growth-lime w-6 h-6 flex-shrink-0"></i>
+                <p class="text-sm text-heavy italic">「業界の慣習上、○○の要件は必須となることが多いですが、先方からそのような要望や言及はありましたか？」</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03. 解析プロンプト構造 -->
+      <section id="prompt-logic">
+        <span class="badge">03. Analysis Logic</span>
+        <h2 class="section-h2">専門家の思考を模倣する論理設計</h2>
+        
+        <div class="info-card">
+          <h4 class="font-black text-lg mb-6 text-midnight border-b-4 border-growth-lime inline-block">内部検証エージェント・ループ設計</h4>
+          <p class="text-heavy text-base mb-8">
+            一人のAIの独走を防ぎ、多角的な「意見」を生成するため、内部で3つの役割を戦わせる設計を採用しています。これは現時点の最善策であり、改善を続けていきます。
+          </p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="p-5 border-2 border-midnight rounded-xl bg-slate-50">
+              <p class="font-black text-[10px] text-slate-500 uppercase mb-2">Role 01：評価者</p>
+              <p class="font-black text-sm">【業界エキスパート】</p>
+              <p class="text-xs text-heavy mt-3">業界知識に基づき、今回の提案が「お客様の商流や課題」に照らして妥当かどうかを判定する。</p>
+            </div>
+            <div class="p-5 border-2 border-midnight rounded-xl bg-slate-50">
+              <p class="font-black text-[10px] text-slate-500 uppercase mb-2">Role 02：批判者</p>
+              <p class="font-black text-sm">【顧客側レビュワー】</p>
+              <p class="text-xs text-heavy mt-3">顧客の立場になりきり、提案の「弱い部分」や「納得できないロジック」を容赦なく指摘する。</p>
+            </div>
+            <div class="p-5 border-4 border-growth-lime rounded-xl bg-white shadow-lg">
+              <p class="font-black text-[10px] text-slate-500 uppercase mb-2">Role 03：統合者</p>
+              <p class="font-black text-sm">【フィードバック監修】</p>
+              <p class="text-xs text-heavy mt-3">双方の意見を整理し、現場で使える「改善のヒント」として最終的なフィードバックを確定する。</p>
+            </div>
+          </div>
+
+          <div class="code-block">
+/* 最善を追求するための自己検証プロセス */
+{
+  "検証原則 01": "証拠優先：すべての意見は面談中の具体的な発言や反応を根拠としなければならない",
+  "検証原則 02": "多角的視点：エキスパートとしての『正論』と、顧客レビュワーとしての『感情的な納得感』を両立させる",
+  "検証原則 03": "具体的指摘：『良い良くない』の判定に留まらず、業界観点を踏まえた具体的な改善ヒントを付与する"
+}
+          </div>
+        </div>
+      </section>
+
+      <!-- 04. 出力定義 -->
+      <section id="output-schema">
+        <span class="badge">04. Output Definition</span>
+        <h2 class="section-h2">最終フィードバックのアウトプット定義</h2>
+        
+        <div class="feedback-spec-grid">
+          <div class="feedback-spec-item">
+            <div class="feedback-label">要約</div>
+            <div class="feedback-content">商談の核となる論点と、お客様の真の関心事を整理。</div>
+          </div>
+          <div class="feedback-spec-item">
+            <div class="feedback-label">評価</div>
+            <div class="feedback-content">専門家から見た、今回の提案の「筋が良い」点と有効だった行動。</div>
+          </div>
+          <div class="feedback-spec-item">
+            <div class="feedback-label">改善</div>
+            <div class="feedback-content">業界の観点から見て不足していた情報や、お客様が納得しきれなかった要素の指摘。</div>
+          </div>
+          <div class="feedback-spec-item">
+            <div class="feedback-label">一手</div>
+            <div class="feedback-content">次回の面談で、提案の質を劇的に高めるための具体的なアドバイス。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05. インフラ構成 -->
+      <section id="infrastructure">
+        <span class="badge">05. Technology</span>
+        <h2 class="section-h2">基盤技術とセキュリティ</h2>
+        <div class="info-card bg-white">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div>
+              <h4 class="font-black text-[10px] text-slate-500 uppercase tracking-widest mb-4">Technology Stack</h4>
+              <ul class="text-sm space-y-4 font-black">
+                <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-growth-lime"></i> Google Apps Script (Serverless)</li>
+                <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-growth-lime"></i> Gemini 1.5 Pro (Native Multimodal)</li>
+                <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-growth-lime"></i> gBizINFO (経産省法人API)</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-black text-[10px] text-slate-500 uppercase tracking-widest mb-4">Security Policy</h4>
+              <ul class="text-sm space-y-4 font-black text-midnight">
+                <li>• PropertiesService による認証情報の秘匿。</li>
+                <li>• 解析プロセスのサーバーサイド完結によるデータ保護。</li>
+                <li>• GASの6分制限に対応した非同期処理設計。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    window.onload = () => {
+      window.scrollTo(0, 0);
+      setTimeout(() => {
+        document.getElementById('splash').style.opacity = '0';
+        document.body.classList.add('app-ready');
+        document.body.style.overflowY = 'auto';
+        setTimeout(() => document.getElementById('splash').style.display = 'none', 800);
+      }, 2500);
+    };
+
+    const sections = document.querySelectorAll('section');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navItems.forEach(n => n.classList.remove('active'));
+          entry.target.classList.add('active');
+          const id = entry.target.getAttribute('id');
+          const activeNav = document.querySelector(`.nav-item[href="#${id}"]`);
+          if (activeNav) activeNav.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+
+    sections.forEach(section => observer.observe(section));
+
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = item.getAttribute('href');
+            document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+  </script>
+</body>
+</html>
