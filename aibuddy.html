@@ -174,7 +174,7 @@
           <div class="w-7 h-7 bg-white text-midnight rounded flex items-center justify-center font-black text-sm border-2 border-midnight">B</div>
           <span class="text-lg font-black tracking-widest uppercase">AI.BUDDY</span>
         </div>
-        <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Technical Specification v5.1</p>
+        <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Technical Specification v5.2</p>
       </div>
 
       <nav class="flex-1">
@@ -187,7 +187,7 @@
 
       <div class="mt-auto pt-6 border-t border-white/10 opacity-40">
         <p class="text-[8px] leading-relaxed font-bold uppercase">
-          Build: 2026.03.30.rev14<br>
+          Build: 2026.03.30.rev15<br>
           Eng: Strategic Agent
         </p>
       </div>
@@ -241,12 +241,24 @@
             <div class="timeline-dot"></div>
             <div class="timeline-content border-4 border-midnight bg-slate-50">
               <h4 class="font-black text-xl mb-4">3. フィードバック精度向上のための対話型検証</h4>
-              <p class="text-heavy text-base mb-4">
-                情報の欠落や論理の矛盾が疑われる場合、AIは独断で結論を出さず、ユーザーへ逆質問を実行する。
+              <p class="text-heavy text-base mb-6">
+                AIは「商談ログからは読み取れないが、成約に不可欠なピース」を検出し、ユーザーへの逆質問を行います。
               </p>
-              <div class="p-4 bg-white rounded-lg border-2 border-midnight flex gap-4 items-start shadow-[4px_4px_0px_#020617]">
-                <i data-lucide="help-circle" class="text-growth-lime w-6 h-6 flex-shrink-0"></i>
-                <p class="text-sm text-heavy italic">「業界の慣習上、○○の要件は必須となりますが、先方から要望はありましたか？」</p>
+              
+              <div class="space-y-4">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">想定される検証クエリのサンプル</p>
+                <div class="p-4 bg-white rounded-lg border-2 border-midnight flex gap-4 items-start shadow-[4px_4px_0px_#020617] group hover:bg-lime-50 transition-colors">
+                  <i data-lucide="help-circle" class="text-growth-lime w-6 h-6 flex-shrink-0"></i>
+                  <p class="text-sm text-heavy italic">「gBizINFOのデータから、お相手は現在○○への注力が見受けられます。提案中、その戦略目標への貢献を問うような踏み込んだ反応はありましたか？」</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg border-2 border-midnight flex gap-4 items-start shadow-[4px_4px_0px_#020617] group hover:bg-lime-50 transition-colors">
+                  <i data-lucide="help-circle" class="text-growth-lime w-6 h-6 flex-shrink-0"></i>
+                  <p class="text-sm text-heavy italic">「価格提示後に約4秒間の沈黙が検出されました。お相手の表情からは迷いが見えましたが、その際、言葉にならなかった懸念点などは感じ取れましたか？」</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg border-2 border-midnight flex gap-4 items-start shadow-[4px_4px_0px_#020617] group hover:bg-lime-50 transition-colors">
+                  <i data-lucide="help-circle" class="text-growth-lime w-6 h-6 flex-shrink-0"></i>
+                  <p class="text-sm text-heavy italic">「決裁ルートの把握が不十分な可能性があります。本日不在だったキーマンへの説明順序や、合意形成の段取りについて具体的に踏み込めましたか？」</p>
+                </div>
               </div>
             </div>
           </div>
@@ -270,7 +282,7 @@
             </div>
             <div class="p-5 border-4 border-growth-lime rounded-xl bg-white shadow-lg">
               <p class="font-black text-sm">【Role 03：統合】</p>
-              <p class="text-xs text-heavy mt-3">双方の議論を整理し、証拠（発言引用）を確認。現場で即座に役立つ改善のヒントを確定する。</p>
+              <p class="text-xs text-heavy mt-3">双方の議論を整理し、証拠（発言引用）を確認. 現場で即座に役立つ改善のヒントを確定する。</p>
             </div>
           </div>
         </div>
@@ -354,7 +366,7 @@
             <thead>
               <tr>
                 <th>判定ステータス</th>
-                <th>表情・視覚的特徴（Gemini解析対象）</th>
+                <th>表情・視覚得徴（Gemini解析対象）</th>
                 <th>発話・時間的特徴（Gemini解析対象）</th>
               </tr>
             </thead>
