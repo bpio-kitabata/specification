@@ -27,7 +27,7 @@
         }
         .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
         
-        /* 1. Navigation Header */
+        /* Navigation Header */
         .nav-container {
             position: sticky;
             top: 0;
@@ -59,7 +59,7 @@
             border-color: var(--text-main);
         }
 
-        /* 2. Layout */
+        /* Layout */
         .content-container {
             max-width: 960px;
             margin: 0 auto;
@@ -80,16 +80,15 @@
             padding-bottom: 0.5rem;
         }
 
-        /* 3. Summary Box */
+        /* Summary Box */
         .summary-box {
             background-color: var(--bg-gray);
             border-left: 4px solid var(--text-main);
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
-        .summary-box p { font-weight: 600; color: var(--text-main); }
 
-        /* 4. Dense Table Specification */
+        /* Dense Table Specification */
         .table-wrapper {
             margin: 1rem 0;
             border: 1px solid var(--border-dark);
@@ -147,7 +146,7 @@
         <div class="nav-inner">
             <nav class="flex gap-2">
                 <a href="#overview" class="nav-link active">概要</a>
-                <a href="#structure" class="nav-link">シート構成</a>
+                <a href="#structure" class="nav-link">構成</a>
                 <a href="#definition" class="nav-link">出力定義</a>
                 <a href="#logic" class="nav-link">集計ロジック</a>
             </nav>
@@ -156,16 +155,15 @@
 
     <main class="content-container">
 
-        <h1 class="text-2xl font-black mb-1 tracking-tighter">給与仕訳データ作成 仕様書</h1>
-        <p class="text-slate-600 mb-8 text-xs font-bold uppercase tracking-widest">Payroll Journal Automation Engine / Specification v5.0.0</p>
+        <h1 class="text-2xl font-black mb-1 tracking-tighter uppercase">給与仕訳データ作成 仕様書</h1>
+        <p class="text-slate-600 mb-8 text-xs font-bold uppercase tracking-widest">Payroll Journal Automation Engine / Specification v5.2.0</p>
 
         <!-- 01 / Overview -->
         <section id="overview">
             <h2 class="section-title">1. 概要</h2>
             <div class="summary-box">
-                <p class="mb-2 underline decoration-2 decoration-blue-500">プロジェクト目的</p>
-                <div class="text-sm space-y-2 leading-relaxed">
-                    <p>給与奉行出力の「支給控除一覧表CSV」を解析し、会計システムへ取り込める形式の仕訳データを自動生成する。スプレッドシート上のマスタ（勘定コード、部門コード）を参照し、社員ごとの部門特定および項目別の勘定科目割当を正確に実行する。<strong>「一切の推論を排除した厳密なマッピング」</strong>を絶対条件とする。</p>
+                <div class="text-sm leading-relaxed font-bold">
+                    <p>給与奉行出力の支給控除一覧表CSVを解析し、給与IF用のデータを生成する。スプレッドシート上のマスタ（勘定コード、部門コード）を参照し、社員ごとの部門特定および項目別の勘定科目割当を正確に実行する。<strong>「一切の推論を排除した厳密なマッピング」</strong>を絶対条件とする。</p>
                 </div>
             </div>
         </section>
@@ -222,21 +220,21 @@
                         <tr><td class="col-id">H</td><td class="col-label">勘定コード</td><td>勘定コードシートより、CSV項目名に合致するコードを取得</td></tr>
                         <tr><td class="col-id">I</td><td class="col-label">部門コード</td><td>社員番号より所属部門を解決（または管理部門コードを適用）</td></tr>
                         <tr><td class="col-id">J</td><td class="col-label">社員取引先コード</td><td>CSV内の<strong>「社員番号」</strong>をそのままセット</td></tr>
-                        <tr style="background: #eff6ff;"><td class="col-id" style="color: var(--accent-blue);">K</td><td class="col-label" style="color: var(--accent-blue);">明細テキスト</td><td class="text-bold-black">仕訳パターンごとの定義を適用（詳細は <a href="#logic" class="anchor-link">4. 集計ロジック</a> セクションを厳守）</td></tr>
+                        <tr style="background: #eff6ff;"><td class="col-id" style="color: var(--accent-blue);">K</td><td class="col-label" style="color: var(--accent-blue);">明細テキスト</td><td class="text-bold-black">仕訳パターンごとにの定義を適用（詳細は <a href="#logic" class="anchor-link">4. 集計ロジック</a> セクションを厳守）</td></tr>
                         <tr><td class="col-id">L</td><td class="col-label">税込金額</td><td>CSV該当項目の数値を実数でセット</td></tr>
                         <tr><td class="col-id">M</td><td class="col-label">消費税額</td><td>CSVの対応する<strong>「消費税額」</strong>列から値を取得</td></tr>
-                        <tr><td class="col-id">N</td><td class="col-label">振替元会社コード</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">O</td><td class="col-label">振替元部門コード</td><td class="text-slate-400">（空欄）</td></tr>
+                        <tr><td class="col-id">N</td><td class="col-label">振替元会社コード</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">O</td><td class="col-label">振替元部門コード</td><td>（空欄）</td></tr>
                         <tr><td class="col-id">P</td><td class="col-label">抽出状況区分</td><td class="text-bold-black">0</td></tr>
-                        <tr><td class="col-id">Q</td><td class="col-label">エラーメッセージ</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">R</td><td class="col-label">取引NO</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">S</td><td class="col-label">連結仕訳管理連番</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">T</td><td class="col-label">作成プログラムID</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">U</td><td class="col-label">作成日時</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">V</td><td class="col-label">作成ユーザーID</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">W</td><td class="col-label">最終更新プログラムID</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">X</td><td class="col-label">最終更新日時</td><td class="text-slate-400">（空欄）</td></tr>
-                        <tr><td class="col-id">Y</td><td class="col-label">最終更新ユーザーID</td><td class="text-slate-400">（空欄）</td></tr>
+                        <tr><td class="col-id">Q</td><td class="col-label">エラーメッセージ</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">R</td><td class="col-label">取引NO</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">S</td><td class="col-label">連結仕訳管理連番</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">T</td><td class="col-label">作成プログラムID</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">U</td><td class="col-label">作成日時</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">V</td><td class="col-label">作成ユーザーID</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">W</td><td class="col-label">最終更新プログラムID</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">X</td><td class="col-label">最終更新日時</td><td>（空欄）</td></tr>
+                        <tr><td class="col-id">Y</td><td class="col-label">最終更新ユーザーID</td><td>（空欄）</td></tr>
                     </tbody>
                 </table>
             </div>
