@@ -27,7 +27,7 @@
         }
         .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
         
-        /* Navigation Header */
+        /* 1. Navigation Header */
         .nav-container {
             position: sticky;
             top: 0;
@@ -59,7 +59,7 @@
             border-color: var(--text-main);
         }
 
-        /* Layout */
+        /* 2. Layout */
         .content-container {
             max-width: 960px;
             margin: 0 auto;
@@ -80,7 +80,7 @@
             padding-bottom: 0.5rem;
         }
 
-        /* Summary Box */
+        /* 3. Summary Box */
         .summary-box {
             background-color: var(--bg-gray);
             border-left: 4px solid var(--text-main);
@@ -88,7 +88,7 @@
             margin-bottom: 2rem;
         }
 
-        /* Dense Table Specification */
+        /* 4. Dense Table Specification */
         .table-wrapper {
             margin: 1rem 0;
             border: 1px solid var(--border-dark);
@@ -156,7 +156,7 @@
     <main class="content-container">
 
         <h1 class="text-2xl font-black mb-1 tracking-tighter uppercase">給与仕訳データ作成 仕様書</h1>
-        <p class="text-slate-600 mb-8 text-xs font-bold uppercase tracking-widest">Payroll Journal Automation Engine / Specification v5.2.0</p>
+        <p class="text-slate-600 mb-8 text-xs font-bold uppercase tracking-widest">Payroll Journal Automation Engine / Specification v6.2.0</p>
 
         <!-- 01 / Overview -->
         <section id="overview">
@@ -176,20 +176,24 @@
                     <thead>
                         <tr>
                             <th style="width: 150px;">シート名</th>
-                            <th>物理列構成（左からの順序）</th>
+                            <th>物理列構成（左からの順序） / 役割</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
+                            <td class="text-bold-black">支給控除一覧</td>
+                            <td>奉行CSVを貼り付けるインプットシート</td>
+                        </tr>
+                        <tr>
                             <td class="text-bold-black">勘定コード</td>
-                            <td class="text-bold-black">給与取引NO / 仕訳パターンコード / 勘定科目名 / 勘定コード / 補助科目コード / 税区分 / CSV項目名</td>
+                            <td>給与取引NO / 仕訳パターンコード / 勘定科目名 / 勘定コード / 補助科目コード / 税区分 / CSV項目名</td>
                         </tr>
                         <tr>
                             <td>部門コード</td>
                             <td>社員番号 / 部門コード / 部門名 / 管理部門コード / 支給日</td>
                         </tr>
                         <tr>
-                            <td class="text-bold-black" style="color: var(--accent-blue);">給与仕訳</td>
+                            <td class="text-bold-black">給与仕訳</td>
                             <td>最終出力成果物（A列：給与取引NO 〜 Y列：最終更新ユーザーID）</td>
                         </tr>
                     </tbody>
@@ -210,22 +214,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td class="col-id">A</td><td class="col-label">給与取引NO</td><td class="text-bold-black">D1給与（伝票1）：1、D1給与（伝票2）：2、D1賞与（伝票1）：6、D1賞与（伝票2）：7</td></tr>
+                        <tr><td class="col-id">A</td><td class="col-label">給与取引NO</td><td>D1給与（伝票1）：1、D1給与（伝票2）：2、D1賞与（伝票1）：6、D1賞与（伝票2）：7</td></tr>
                         <tr><td class="col-id">B</td><td class="col-label">明細行NO</td><td>同一取引NO内での連番（1, 2, 3...）</td></tr>
                         <tr><td class="col-id">C</td><td class="col-label">伝票種別</td><td class="text-bold-black">D1給与：Q100 / D1賞与：Q200</td></tr>
-                        <tr><td class="col-id">D</td><td class="col-label">仕訳パターンコード</td><td>勘定コードシートに定義された「仕訳パターンコード」を適用</td></tr>
-                        <tr><td class="col-id">E</td><td class="col-label">会社コード</td><td class="text-bold-black">1000</td></tr>
-                        <tr><td class="col-id">F</td><td class="col-label">転記日付</td><td>部門コードシートの<strong>「支給日」</strong>を参照</td></tr>
-                        <tr><td class="col-id">G</td><td class="col-label">伝票日付</td><td>部門コードシートの<strong>「支給日」</strong>を参照</td></tr>
+                        <tr style="background: #fffbeb;"><td class="col-id" style="color: #92400e;">D</td><td class="col-label" style="color: #92400e;">仕訳パターンコード</td><td class="text-bold-black">A列（給与取引NO）に基づき勘定コードマスタから決定。Q100-01-01〜Q200-02-01までの全パターンを厳密にマッピング。</td></tr>
+                        <tr><td class="col-id">E</td><td class="col-label">会社コード</td><td>1000</td></tr>
+                        <tr><td class="col-id">F</td><td class="col-label">転記日付</td><td>支給控除一覧シート（CSVインプット）内の日付項目を参照</td></tr>
+                        <tr><td class="col-id">G</td><td class="col-label">伝票日付</td><td>支給控除一覧シート（CSVインプット）内の日付項目を参照</td></tr>
                         <tr><td class="col-id">H</td><td class="col-label">勘定コード</td><td>勘定コードシートより、CSV項目名に合致するコードを取得</td></tr>
-                        <tr><td class="col-id">I</td><td class="col-label">部門コード</td><td>社員番号より所属部門を解決（または管理部門コードを適用）</td></tr>
-                        <tr><td class="col-id">J</td><td class="col-label">社員取引先コード</td><td>CSV内の<strong>「社員番号」</strong>をそのままセット</td></tr>
+                        <tr><td class="col-id">I</td><td class="col-label">部門コード</td><td>集計単位となる部門を部門シートより取得</td></tr>
+                        <tr><td class="col-id">J</td><td class="col-label">社員取引先コード</td><td class="text-bold-black">要確認</td></tr>
                         <tr style="background: #eff6ff;"><td class="col-id" style="color: var(--accent-blue);">K</td><td class="col-label" style="color: var(--accent-blue);">明細テキスト</td><td class="text-bold-black">仕訳パターンごとにの定義を適用（詳細は <a href="#logic" class="anchor-link">4. 集計ロジック</a> セクションを厳守）</td></tr>
                         <tr><td class="col-id">L</td><td class="col-label">税込金額</td><td>CSV該当項目の数値を実数でセット</td></tr>
-                        <tr><td class="col-id">M</td><td class="col-label">消費税額</td><td>CSVの対応する<strong>「消費税額」</strong>列から値を取得</td></tr>
+                        <tr><td class="col-id">M</td><td class="col-label">消費税額</td><td>CSV該当項目の数値を実数でセット</td></tr>
                         <tr><td class="col-id">N</td><td class="col-label">振替元会社コード</td><td>（空欄）</td></tr>
                         <tr><td class="col-id">O</td><td class="col-label">振替元部門コード</td><td>（空欄）</td></tr>
-                        <tr><td class="col-id">P</td><td class="col-label">抽出状況区分</td><td class="text-bold-black">0</td></tr>
+                        <tr><td class="col-id">P</td><td class="col-label">抽出状況区分</td><td>0（固定）</td></tr>
                         <tr><td class="col-id">Q</td><td class="col-label">エラーメッセージ</td><td>（空欄）</td></tr>
                         <tr><td class="col-id">R</td><td class="col-label">取引NO</td><td>（空欄）</td></tr>
                         <tr><td class="col-id">S</td><td class="col-label">連結仕訳管理連番</td><td>（空欄）</td></tr>
