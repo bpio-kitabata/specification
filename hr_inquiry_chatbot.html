@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>業務自動化AIチャットボットシステム 仕様書</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --navy-dark: #0f172a;
+            --accent-navy: #1e293b;
+            --border-color: #e2e8f0;
+            --bg-gray: #f8fafc;
+            --blue-primary: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #ffffff;
+            color: var(--navy-dark);
+            line-height: 1.7;
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        section {
+            scroll-margin-top: 100px;
+            padding-bottom: 4rem;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.5s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .menu-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-pill {
+            padding: 0.5rem 1.2rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .nav-pill.active {
+            background-color: var(--navy-dark);
+            color: #ffffff;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            padding-bottom: 0.75rem;
+            margin-bottom: 2.5rem;
+            border-bottom: 3px solid var(--navy-dark);
+            display: inline-block;
+            letter-spacing: -0.02em;
+        }
+
+        .highlight {
+            font-weight: 800;
+            color: var(--navy-dark);
+        }
+        .highlight-blue {
+            font-weight: 800;
+            color: var(--blue-primary);
+        }
+
+        .diag-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 700;
+            width: 180px;
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+        .connector {
+            flex-grow: 1;
+            height: 3px;
+            background: #cbd5e1;
+            position: relative;
+            min-width: 40px;
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: -2px; top: -6px;
+            border-left: 10px solid #cbd5e1;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+        }
+
+        .tenant-box {
+            border: 2px dashed #475569;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            position: relative;
+            background: rgba(255,255,255,0.03);
+        }
+        .tenant-box::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -12px; left: 24px;
+            background: #0f172a;
+            padding: 0 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .point-box {
+            background-color: #f1f5f9;
+            border-left: 6px solid var(--navy-dark);
+            padding: 1.5rem 2rem;
+            margin: 3rem 0;
+            font-size: 1.05rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        p, li, td, th {
+            font-size: 1.05rem;
+        }
+        .sub-text {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- ナビゲーション -->
+    <nav class="menu-bar">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center gap-6">
+            <span class="text-xs font-black text-slate-400 uppercase tracking-widest mr-4">CONTENTS</span>
+            <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                <a href="#summary" class="nav-pill active" data-section="summary">概要</a>
+                <a href="#specs" class="nav-pill" data-section="specs">データの流れ</a>
+                <a href="#multitenant" class="nav-pill" data-section="multitenant">マルチテナント対応</a>
+                <a href="#logic" class="nav-pill" data-section="logic">AIの仕組み (RAG)</a>
+                <a href="#flow" class="nav-pill" data-section="flow">導入フロー</a>
+                <a href="#tech" class="nav-pill" data-section="tech">技術詳細</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- メイン -->
+    <main class="max-w-6xl mx-auto px-8 py-16 space-y-32">
+
+        <!-- 表紙 -->
+        <header class="reveal space-y-4 border-l-8 border-slate-900 pl-10 py-2">
+            <div class="text-blue-600 text-xs font-black tracking-[0.3em] uppercase">BPIO AI Automation Project</div>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                AI労務問い合わせ対応システム<br>
+                <span class="opacity-40 font-light text-2xl md:text-3xl">一元管理型チャットボット 仕様定義書</span>
+            </h1>
+        </header>
+
+        <!-- 1. 概要 -->
+        <section id="summary" class="reveal">
+            <h2 class="section-title">1. 概要</h2>
+            
+            <div class="space-y-8">
+                <div class="text-slate-600 space-y-6 max-w-4xl">
+                    <p class="text-xl leading-relaxed">
+                        本システムは、BPIOが複数のクライアント企業の従業員対応を、<span class="text-blue-600 font-extrabold border-b-2 border-blue-100">マルチテナント対応</span>によって1つのプロダクトで統合的に運用することを目的としています。
+                    </p>
+                    <p>
+                        新規顧客ごとに個別のアプリ構築は不要です。管理シートに情報を1行追加するだけで、その会社専用の回答AIとSlack通知窓口を即座に有効化できます。実用性と運用の簡便さを最優先に設計されています。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 基本仕様 (システム連携フロー) -->
+        <section id="specs" class="reveal">
+            <h2 class="section-title">2. 基本仕様：データの流れ</h2>
+            <p class="text-slate-500 mb-10">情報の登録から、AI回答、Slack通知に至るまでの実務フローです。</p>
+            
+            <div class="bg-slate-50 rounded-[2rem] p-12 border border-slate-200 overflow-x-auto">
+                <div class="min-w-[900px] flex items-center justify-between gap-2">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="diag-card border-blue-400">
+                            <div class="p-3 bg-blue-50 rounded-full w-fit mx-auto mb-3">
+                                <i data-lucide="table-2" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            管理シート(SS)<br>
+                            <span class="sub-text font-normal mt-1 block">顧客・通知先を記入</span>
+                        </div>
+                        <p class="text-sm font-black text-blue-600">01. 登録</p>
+                    </div>
+
+                    <div class="connector"></div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="diag-card bg-slate-900 text-white border-slate-900">
+                            <div class="p-3 bg-white/10 rounded-full w-fit mx-auto mb-3">
+                                <i data-lucide="monitor" class="w-6 h-6 text-blue-300"></i>
+                            </div>
+                            チャット画面<br>
+                            <span class="text-[11px] font-normal opacity-60 mt-1 block">従業員が質問を入力</span>
+                        </div>
+                        <p class="text-sm font-black text-slate-400">02. 質問受付</p>
+                    </div>
+
+                    <div class="connector"></div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="diag-card border-purple-400">
+                            <div class="p-3 bg-purple-50 rounded-full w-fit mx-auto mb-3">
+                                <i data-lucide="sparkles" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                            回答生成AI<br>
+                            <span class="sub-text font-normal mt-1 block">個別規約を元に推論</span>
+                        </div>
+                        <p class="text-sm font-black text-purple-600">03. AI回答</p>
+                    </div>
+
+                    <div class="connector"></div>
+
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="diag-card border-green-500">
+                            <div class="p-3 bg-green-50 rounded-full w-fit mx-auto mb-3">
+                                <i data-lucide="slack" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                            Slackチャンネル<br>
+                            <span class="sub-text font-normal mt-1 block">担当者へ即時報告</span>
+                        </div>
+                        <p class="text-sm font-black text-green-600">04. 完了通知</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="point-box">
+                <i data-lucide="info" class="w-5 h-5 inline-block mr-2 mb-1 text-blue-600"></i>
+                <span class="font-black">仕様のポイント：</span> システムがURLに含まれる鍵（キー）を自動識別し、<span class="highlight">「その会社専用の資料」</span>で回答し、<span class="highlight">「指定されたSlack窓口」</span>へ通知を振り分けます。
+            </div>
+        </section>
+
+        <!-- 3. マルチテナント対応 -->
+        <section id="multitenant" class="reveal">
+            <h2 class="section-title">3. マルチテナント対応：仕組みと隔離構造</h2>
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8 text-slate-600">
+                    <p class="text-lg leading-relaxed">
+                        マルチテナントとは、<span class="highlight">「1つの共通システムを、複数の会社で共有して利用する」</span>仕組みのことです。
+                    </p>
+                    <p>
+                        各クライアント企業ごとに個別のアプリケーションを構築するのではなく、システムがアクセスしてきたユーザーの「URLキー」を読み取り、<span class="highlight-blue">参照する知識データや通知先のSlackを内部で瞬時に切り替えます。</span>
+                    </p>
+                    
+                    <!-- URL構造の説明 -->
+                    <div class="p-6 bg-slate-50 border-l-4 border-blue-500 rounded-r-2xl">
+                        <h4 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <i data-lucide="link" class="w-5 h-5 text-blue-500"></i> URL構造による顧客識別
+                        </h4>
+                        <div class="bg-white p-3 font-mono text-xs border border-slate-200 rounded mb-3 overflow-x-auto">
+                            https://script.google.com/.../exec?key=<span class="text-blue-600 font-bold">random-uuid-string</span>
+                        </div>
+                        <p class="sub-text leading-relaxed">
+                            URL末尾に付与された<span class="highlight">「推測困難なアクセスキー」</span>が、データベース（管理シート）上のどの企業と紐付くかをシステムが判断します。このキーが一致しない限り、会社のロゴすら表示されない厳格なアクセス制御を行っています。
+                        </p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl">
+                            <div class="p-3 bg-white rounded-xl shadow-sm"><i data-lucide="lock" class="w-6 h-6 text-slate-700"></i></div>
+                            <div>
+                                <div class="font-black text-slate-900 mb-1 text-lg">情報の論理的隔離</div>
+                                <p class="sub-text leading-relaxed">共通のプログラムを使いつつも、参照先となるGoogleドライブのフォルダIDは各社ごとに完全に独立しているため、他社のデータが混ざることは物理的にありません。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 概念図 -->
+                <div class="bg-slate-900 rounded-[3rem] p-10 text-white shadow-2xl">
+                    <div class="flex flex-col items-center gap-8">
+                        <div class="text-xs uppercase font-black text-blue-400 tracking-[0.3em] border-b border-blue-400/20 pb-4 text-center w-full">Integrated Routing Engine</div>
+                        
+                        <div class="w-full space-y-6">
+                            <div class="tenant-box" data-label="Tenant A (Client 1606)">
+                                <div class="flex justify-between items-center gap-4">
+                                    <div class="text-[11px] font-black bg-white/10 px-3 py-2 rounded">専用資料フォルダ</div>
+                                    <i data-lucide="arrow-right-left" class="w-4 h-4 text-blue-400"></i>
+                                    <div class="text-[11px] font-black bg-blue-500/20 px-3 py-2 rounded text-blue-200">#専用Slack</div>
+                                </div>
+                            </div>
+                            <div class="tenant-box opacity-50" data-label="Tenant B (Client 2024)">
+                                <div class="flex justify-between items-center gap-4">
+                                    <div class="text-[11px] font-black bg-white/10 px-3 py-2 rounded">専用資料フォルダ</div>
+                                    <i data-lucide="arrow-right-left" class="w-4 h-4 text-slate-400"></i>
+                                    <div class="text-[11px] font-black bg-white/10 px-3 py-2 rounded">#専用Slack</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. AIの仕組み：RAG (検索拡張生成) -->
+        <section id="logic" class="reveal">
+            <h2 class="section-title">4. AIの仕組み：RAG（検索拡張生成）</h2>
+            <div class="grid md:grid-cols-2 gap-16">
+                <div class="space-y-6 text-slate-600">
+                    <h3 class="text-xl font-black text-slate-900">情報の鮮度とリアルタイム解析</h3>
+                    <p>
+                        AIは質問を受けるたびに、指定フォルダ内の資料をスキャンする<span class="highlight">RAG（検索拡張生成）</span>方式を採用しています。この方式により、資料を差し替えるだけでAIが即座に最新ルールを回答できるようになります。
+                    </p>
+                    
+                    <!-- ユーザー体験に関する追記 -->
+                    <div class="p-6 bg-slate-50 border-l-4 border-orange-400 rounded-r-2xl">
+                        <h4 class="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                            <i data-lucide="user-check" class="w-5 h-5 text-orange-500"></i> ユーザー体験（UX）の維持
+                        </h4>
+                        <p class="sub-text leading-relaxed">
+                            AIの解析には通常 <span class="highlight">3秒〜6秒</span> 程度の時間を要しますが、UI側で<span class="highlight">「AIが回答を考え中...」</span>といったアニメーションを即座に表示することで、ユーザーが不当に待たされていると感じない工夫を施しています。
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200">
+                    <h3 class="text-xl font-black text-slate-900 mb-8">回答精度を支えるガードレール</h3>
+                    <div class="space-y-6">
+                        <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-100">
+                            <div class="font-black mb-2 flex items-center gap-2 text-slate-800">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-orange-500"></i> ハルシネーションの防止
+                            </div>
+                            <p class="sub-text leading-relaxed">資料に記載がない事項については、AIに推測させず<span class="highlight">「担当者に確認してください」</span>と回答を止める強力な制限をかけています。</p>
+                        </div>
+                        <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-100">
+                            <div class="font-black mb-2 flex items-center gap-2 text-slate-800">
+                                <i data-lucide="scan-text" class="w-5 h-5 text-blue-500"></i> 高度なOCR（文字認識）
+                            </div>
+                            <p class="sub-text leading-relaxed">スキャンされた画像形式のPDFであっても、背景で文字を解析し、回答の根拠として利用可能です。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 導入フロー (BPIO社内実務フロー) -->
+        <section id="flow" class="reveal">
+            <h2 class="section-title">5. 導入の流れ：BPIO社内実務フロー</h2>
+            <div class="grid gap-4 max-w-4xl mx-auto">
+                <div class="flex items-stretch gap-6 group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-lg shadow-lg">01</div>
+                        <div class="w-1 flex-1 bg-slate-100 my-2"></div>
+                    </div>
+                    <div class="flex-1 p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-6 group-hover:bg-white group-hover:border-slate-300 transition-all">
+                        <div class="font-black text-slate-900 text-xl mb-2">管理シートへの登録</div>
+                        <p class="sub-text">共通スプレッドシートに<span class="highlight">「顧客ID」「会社名」「SlackチャンネルID」</span>を入力します。</p>
+                    </div>
+                </div>
+                <div class="flex items-stretch gap-6 group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-lg shadow-lg">02</div>
+                        <div class="w-1 flex-1 bg-slate-100 my-2"></div>
+                    </div>
+                    <div class="flex-1 p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-6 group-hover:bg-white group-hover:border-slate-300 transition-all">
+                        <div class="font-black text-slate-900 text-xl mb-2">フォルダ・キーの自動発行</div>
+                        <p class="sub-text">SSの専用メニューから<span class="highlight">「同期」</span>を実行。自動で専用のDriveフォルダと認証用の鍵が生成されます。</p>
+                    </div>
+                </div>
+                <div class="flex items-stretch gap-6 group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-lg shadow-lg">03</div>
+                        <div class="w-1 flex-1 bg-slate-100 my-2"></div>
+                    </div>
+                    <div class="flex-1 p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-6 group-hover:bg-white group-hover:border-slate-300 transition-all">
+                        <div class="font-black text-slate-900 text-xl mb-2">就業規則等の格納</div>
+                        <p class="sub-text">生成された各社フォルダにPDF等の資料を置きます。AIは即座にこの内容を学習します。</p>
+                    </div>
+                </div>
+                <div class="flex items-stretch gap-6 group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-lg shadow-lg">04</div>
+                        <div class="w-1 flex-1 bg-slate-100 my-2"></div>
+                    </div>
+                    <div class="flex-1 p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-6 group-hover:bg-white group-hover:border-slate-300 transition-all">
+                        <div class="font-black text-slate-900 text-xl mb-2">Slack招待</div>
+                        <p class="sub-text">通知先チャンネルへAIボットを招待<span class="highlight">（/invite）</span>し、疎通確認を行います。</p>
+                    </div>
+                </div>
+                <div class="flex items-stretch gap-6 group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-lg">05</div>
+                    </div>
+                    <div class="flex-1 p-6 bg-blue-50 rounded-2xl border-2 border-blue-200 mb-6">
+                        <div class="font-black text-blue-900 text-xl mb-2">運用開始</div>
+                        <p class="text-blue-700 font-bold">発行された鍵付きURLを顧客へ配布し、サービスを開始します。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 技術詳細 -->
+        <section id="tech" class="reveal">
+            <h2 class="section-title">6. 技術スタック・セキュリティ</h2>
+            <div class="bg-white border-2 border-slate-100 rounded-3xl overflow-hidden shadow-sm">
+                <table class="w-full text-left border-collapse">
+                    <tr class="border-b border-slate-50">
+                        <th class="bg-slate-50 p-6 font-black text-slate-500 w-1/3 text-sm uppercase tracking-wider">実行基盤</th>
+                        <td class="p-6 font-bold">Google Apps Script (Web App公開モード)</td>
+                    </tr>
+                    <tr class="border-b border-slate-50">
+                        <th class="bg-slate-50 p-6 font-black text-slate-500 text-sm uppercase tracking-wider">AIモデル</th>
+                        <td class="p-6 font-black text-blue-600">Gemini 1.5 Flash (Google AI Studio)</td>
+                    </tr>
+                    <tr class="border-b border-slate-50">
+                        <th class="bg-slate-50 p-6 font-black text-slate-500 text-sm uppercase tracking-wider">データベース</th>
+                        <td class="p-6 font-bold">Googleスプレッドシート（設定管理用マスター）</td>
+                    </tr>
+                    <tr class="border-b border-slate-50">
+                        <th class="bg-slate-50 p-6 font-black text-slate-500 text-sm uppercase tracking-wider">ストレージ</th>
+                        <td class="p-6 font-bold">Googleドライブ (ナレッジ資料リポジトリ)</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-slate-50 p-6 font-black text-slate-500 text-sm uppercase tracking-wider">認証</th>
+                        <td class="p-6 font-bold">UUIDアクセスキー / OAuth 2.0</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-white py-20 px-8 text-center">
+        <div class="max-w-4xl mx-auto opacity-40">
+            <p class="text-xs font-black uppercase tracking-[0.5em] mb-4">Internal Confidential</p>
+            <p class="text-sm italic">© 2026 BPIO Inc. | Digital Transformation Team</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        const pills = document.querySelectorAll('.nav-pill');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.id;
+            });
+            pills.forEach(p => {
+                p.classList.remove('active');
+                if (p.getAttribute('data-section') === current) p.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
