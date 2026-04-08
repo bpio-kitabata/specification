@@ -94,6 +94,8 @@
             flex-shrink: 0;
             line-height: 1.4;
         }
+        
+        /* コネクタ（標準：右矢印） */
         .connector {
             flex-grow: 1;
             height: 3px;
@@ -106,6 +108,31 @@
             position: absolute;
             right: -2px; top: -6px;
             border-left: 10px solid #cbd5e1;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+        }
+
+        /* コネクタ（双方向矢印） */
+        .connector-bidirectional {
+            flex-grow: 1;
+            height: 3px;
+            background: #cbd5e1;
+            position: relative;
+            min-width: 40px;
+        }
+        .connector-bidirectional::after {
+            content: '';
+            position: absolute;
+            right: -2px; top: -6px;
+            border-left: 10px solid #cbd5e1;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+        }
+        .connector-bidirectional::before {
+            content: '';
+            position: absolute;
+            left: -2px; top: -6px;
+            border-right: 10px solid #cbd5e1;
             border-top: 7px solid transparent;
             border-bottom: 7px solid transparent;
         }
@@ -198,7 +225,7 @@
         <!-- 2. 基本仕様 (システム連携フロー) -->
         <section id="specs" class="reveal">
             <h2 class="section-title">2. 基本仕様：データの流れ</h2>
-            <p class="text-slate-500 mb-10">情報の登録から、AI回答、Slack通知に至るまでの実務フローです。</p>
+            <p class="text-slate-500 mb-10">情報の登録から、AI回答の提示、Slack通知に至るまでの双方向実務フローです。</p>
             
             <div class="bg-slate-50 rounded-[2rem] p-12 border border-slate-200 overflow-x-auto">
                 <div class="min-w-[900px] flex items-center justify-between gap-2">
@@ -223,12 +250,13 @@
                                 <i data-lucide="monitor" class="w-6 h-6 text-blue-300"></i>
                             </div>
                             チャット画面<br>
-                            <span class="text-[11px] font-normal opacity-60 mt-1 block">従業員が質問を入力</span>
+                            <span class="text-[11px] font-normal opacity-60 mt-1 block">質問の入力と回答表示</span>
                         </div>
-                        <p class="text-sm font-black text-slate-400">02. 質問受付</p>
+                        <p class="text-sm font-black text-slate-400">02. 受付・回答表示</p>
                     </div>
 
-                    <div class="connector"></div>
+                    <!-- 双方向コネクタ -->
+                    <div class="connector-bidirectional"></div>
 
                     <!-- Step 3 -->
                     <div class="flex flex-col items-center gap-4">
@@ -237,9 +265,9 @@
                                 <i data-lucide="sparkles" class="w-6 h-6 text-purple-600"></i>
                             </div>
                             回答生成AI<br>
-                            <span class="sub-text font-normal mt-1 block">個別規約を元に推論</span>
+                            <span class="sub-text font-normal mt-1 block">資料を参照し回答を生成</span>
                         </div>
-                        <p class="text-sm font-black text-purple-600">03. AI回答</p>
+                        <p class="text-sm font-black text-purple-600">03. 解析・回答返却</p>
                     </div>
 
                     <div class="connector"></div>
@@ -251,7 +279,7 @@
                                 <i data-lucide="slack" class="w-6 h-6 text-green-600"></i>
                             </div>
                             Slackチャンネル<br>
-                            <span class="sub-text font-normal mt-1 block">担当者へ即時報告</span>
+                            <span class="sub-text font-normal mt-1 block">担当者へ履歴を即時報告</span>
                         </div>
                         <p class="text-sm font-black text-green-600">04. 完了通知</p>
                     </div>
@@ -260,7 +288,7 @@
 
             <div class="point-box">
                 <i data-lucide="info" class="w-5 h-5 inline-block mr-2 mb-1 text-blue-600"></i>
-                <span class="font-black">仕様のポイント：</span> システムがURLに含まれる鍵（キー）を自動識別し、<span class="highlight">「その会社専用の資料」</span>で回答し、<span class="highlight">「指定されたSlack窓口」</span>へ通知を振り分けます。
+                <span class="font-black">仕様のポイント：</span> システムがURLに含まれる鍵（キー）を自動識別し、<span class="highlight">「その会社専用の資料」</span>で回答を生成して画面へ返却。同時に<span class="highlight">「指定されたSlack窓口」</span>へ通知を振り分けます。
             </div>
         </section>
 
@@ -270,7 +298,7 @@
             <div class="grid md:grid-cols-2 gap-16 items-center">
                 <div class="space-y-8 text-slate-600">
                     <p class="text-lg leading-relaxed">
-                        マルチテナントとは、<span class="highlight">「1つの共通システムを、複数の会社で共有して利用する」</span>仕組みのことです。
+                        マルチテナントとは、<span class="highlight">「1つの共通システムを、複数の会社で共有して利用する」</span>構造のことです。
                     </p>
                     <p>
                         各クライアント企業ごとに個別のアプリケーションを構築するのではなく、システムがアクセスしてきたユーザーの「URLキー」を読み取り、<span class="highlight-blue">参照する知識データや通知先のSlackを内部で瞬時に切り替えます。</span>
